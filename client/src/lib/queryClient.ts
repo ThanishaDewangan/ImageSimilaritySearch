@@ -11,14 +11,23 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  formData?: FormData,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // For form data, don't set Content-Type header (browser will set it with boundary)
+  // and don't stringify the body
+  const options: RequestInit = {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
-  });
+  };
 
+  if (formData) {
+    options.body = formData;
+  } else if (data) {
+    options.headers = { "Content-Type": "application/json" };
+    options.body = JSON.stringify(data);
+  }
+
+  const res = await fetch(url, options);
   await throwIfResNotOk(res);
   return res;
 }

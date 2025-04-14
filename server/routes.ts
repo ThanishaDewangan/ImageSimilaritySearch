@@ -32,11 +32,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload an image
   app.post('/api/images/upload', upload.single('image'), async (req: Request, res: Response) => {
     try {
+      console.log('Upload request received:', { 
+        hasFile: !!req.file,
+        contentType: req.headers['content-type'],
+        bodyKeys: Object.keys(req.body || {})
+      });
+      
       if (!req.file) {
         return res.status(400).json({ success: false, error: 'No image uploaded' });
       }
 
       const { mimetype, buffer, size } = req.file;
+      console.log('Processing image:', { mimetype, size });
       
       // Validate MIME type
       if (!['image/jpeg', 'image/png'].includes(mimetype)) {
