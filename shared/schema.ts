@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -42,7 +43,7 @@ export type Image = typeof images.$inferSelect;
 // Search history to track user searches
 export const searchHistory = pgTable("search_history", {
   id: serial("id").primaryKey(),
-  sourceImageId: integer("source_image_id").notNull(),
+  sourceImageId: integer("source_image_id").notNull().references(() => images.id),
   resultCount: integer("result_count").notNull(),
   searchedAt: timestamp("searched_at").defaultNow()
 });
@@ -54,6 +55,14 @@ export const insertSearchHistorySchema = createInsertSchema(searchHistory).omit(
 
 export type InsertSearchHistory = z.infer<typeof insertSearchHistorySchema>;
 export type SearchHistory = typeof searchHistory.$inferSelect;
+
+// Define relations
+export const searchHistoryRelations = relations(searchHistory, ({ one }) => ({
+  sourceImage: one(images, {
+    fields: [searchHistory.sourceImageId],
+    references: [images.id],
+  }),
+}));
 
 // Similar image result object (not a table, just for API responses)
 export const similarImageSchema = z.object({

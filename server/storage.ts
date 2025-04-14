@@ -1,4 +1,6 @@
-import { images, type Image, type InsertImage, searchHistory, type SearchHistory, type InsertSearchHistory, type SimilarImage } from "@shared/schema";
+import { images, type Image, type InsertImage, searchHistory, type SearchHistory, type InsertSearchHistory, type SimilarImage, users, type User, type InsertUser } from "@shared/schema";
+import { db } from "./db";
+import { eq, ne, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -172,4 +174,145 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // Helper method to calculate cosine similarity between two vectors
+  private calculateCosineSimilarity(vectorA: number[], vectorB: number[]): number {
+    if (vectorA.length !== vectorB.length) {
+      throw new Error('Vectors must have the same length');
+    }
+    
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    
+    for (let i = 0; i < vectorA.length; i++) {
+      dotProduct += vectorA[i] * vectorB[i];
+      normA += vectorA[i] * vectorA[i];
+      normB += vectorB[i] * vectorB[i];
+    }
+    
+    if (normA === 0 || normB === 0) {
+      return 0; // To avoid division by zero
+    }
+    
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+  
+  // Image methods
+  async getImage(id: number): Promise<Image | undefined> {
+    const [image] = await db.select().from(images).where(eq(images.id, id));
+    return image || undefined;
+  }
+  
+  async getAllImages(): Promise<Image[]> {
+    return await db.select().from(images);
+  }
+  
+  async saveImage(insertImage: InsertImage): Promise<Image> {
+    // Ensure source has a default value if needed
+    const imageData = {
+      ...insertImage,
+      source: insertImage.source || 'user-upload'
+    };
+    
+    const [image] = await db
+      .insert(images)
+      .values(imageData)
+      .returning();
+    
+    return image;
+  }
+
+  // Search history methods
+  async getSearchHistory(): Promise<(SearchHistory & { sourceImage: Image })[]> {
+    const results = await db
+      .select({
+        history: searchHistory,
+        sourceImage: images
+      })
+      .from(searchHistory)
+      .innerJoin(images, eq(searchHistory.sourceImageId, images.id))
+      .orderBy(desc(searchHistory.searchedAt));
+    
+    return results.map(({ history, sourceImage }) => ({
+      ...history,
+      sourceImage
+    }));
+  }
+  
+  async addSearchHistory(insertHistory: InsertSearchHistory): Promise<SearchHistory> {
+    const [history] = await db
+      .insert(searchHistory)
+      .values(insertHistory)
+      .returning();
+    
+    return history;
+  }
+  
+  async clearSearchHistory(): Promise<void> {
+    await db.delete(searchHistory);
+  }
+  
+  // Find similar images based on feature vector cosine similarity
+  async findSimilarImages(sourceImageId: number, limit: number = 10): Promise<SimilarImage[]> {
+    const sourceImage = await this.getImage(sourceImageId);
+    if (!sourceImage) {
+      throw new Error(`Source image with id ${sourceImageId} not found`);
+    }
+    
+    // Get all images except the source image
+    const allImages = await db
+      .select()
+      .from(images)
+      .where(ne(images.id, sourceImageId));
+    
+    const sourceFeatureVector = sourceImage.featureVector as number[];
+    
+    // Calculate similarities
+    const similarities = allImages.map(image => {
+      const targetFeatureVector = image.featureVector as number[];
+      const similarity = this.calculateCosineSimilarity(sourceFeatureVector, targetFeatureVector);
+      return { image, score: similarity };
+    });
+    
+    // Sort by similarity score in descending order and take the top 'limit' results
+    const sortedResults = similarities
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+    
+    // Format results
+    return sortedResults.map(({ image, score }) => ({
+      id: image.id,
+      filename: image.filename,
+      mimeType: image.mimeType,
+      width: image.width,
+      height: image.height,
+      size: image.size,
+      source: image.source || 'unknown', // Ensure source is always a string
+      similarityScore: Math.round(score * 100) / 100, // Round to 2 decimal places
+      imageData: image.imageData
+    }));
+  }
+}
+
+// Use the DatabaseStorage for production
+export const storage = new DatabaseStorage();

@@ -26,38 +26,35 @@ export default function Header() {
             </div>
             {!isMobile && (
               <div className="ml-6 flex space-x-6">
-                <Link href="/">
-                  <a
-                    className={`px-3 py-2 text-sm font-medium border-b-2 ${
-                      location === "/"
-                        ? "text-dark border-primary"
-                        : "text-gray-500 border-transparent hover:text-primary"
-                    }`}
-                  >
-                    Search
-                  </a>
+                <Link 
+                  href="/"
+                  className={`px-3 py-2 text-sm font-medium border-b-2 ${
+                    location === "/"
+                      ? "text-dark border-primary"
+                      : "text-gray-500 border-transparent hover:text-primary"
+                  }`}
+                >
+                  Search
                 </Link>
-                <Link href="/history">
-                  <a
-                    className={`px-3 py-2 text-sm font-medium border-b-2 ${
-                      location === "/history"
-                        ? "text-dark border-primary"
-                        : "text-gray-500 border-transparent hover:text-primary"
-                    }`}
-                  >
-                    History
-                  </a>
+                <Link 
+                  href="/history"
+                  className={`px-3 py-2 text-sm font-medium border-b-2 ${
+                    location === "/history"
+                      ? "text-dark border-primary"
+                      : "text-gray-500 border-transparent hover:text-primary"
+                  }`}
+                >
+                  History
                 </Link>
-                <Link href="/about">
-                  <a
-                    className={`px-3 py-2 text-sm font-medium border-b-2 ${
-                      location === "/about"
-                        ? "text-dark border-primary"
-                        : "text-gray-500 border-transparent hover:text-primary"
-                    }`}
-                  >
-                    About
-                  </a>
+                <Link 
+                  href="/about"
+                  className={`px-3 py-2 text-sm font-medium border-b-2 ${
+                    location === "/about"
+                      ? "text-dark border-primary"
+                      : "text-gray-500 border-transparent hover:text-primary"
+                  }`}
+                >
+                  About
                 </Link>
               </div>
             )}
@@ -87,41 +84,38 @@ export default function Header() {
       {isMobile && mobileMenuOpen && (
         <div className="bg-white shadow-md">
           <div className="px-4 py-3 space-y-1">
-            <Link href="/">
-              <a
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  location === "/"
-                    ? "bg-primary bg-opacity-10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Search
-              </a>
+            <Link 
+              href="/"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                location === "/"
+                  ? "bg-primary bg-opacity-10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Search
             </Link>
-            <Link href="/history">
-              <a
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  location === "/history"
-                    ? "bg-primary bg-opacity-10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                History
-              </a>
+            <Link 
+              href="/history"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                location === "/history"
+                  ? "bg-primary bg-opacity-10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              History
             </Link>
-            <Link href="/about">
-              <a
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  location === "/about"
-                    ? "bg-primary bg-opacity-10 text-primary"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                About
-              </a>
+            <Link 
+              href="/about"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                location === "/about"
+                  ? "bg-primary bg-opacity-10 text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About
             </Link>
           </div>
         </div>
