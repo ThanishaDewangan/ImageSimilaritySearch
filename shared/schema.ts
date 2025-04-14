@@ -2,6 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User entity (kept from original)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -16,17 +17,18 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
-// Image schema
+// Image entity to store uploaded images and their feature vectors
 export const images = pgTable("images", {
   id: serial("id").primaryKey(),
   filename: text("filename").notNull(),
-  originalUrl: text("original_url"),
-  width: integer("width"),
-  height: integer("height"),
-  filesize: integer("filesize"),
-  format: text("format"),
+  mimeType: text("mime_type").notNull(),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  size: integer("size").notNull(),
+  source: text("source").default("user-upload"),
   featureVector: jsonb("feature_vector").notNull(),
-  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+  imageData: text("image_data").notNull(), // base64 encoded image
+  uploadedAt: timestamp("uploaded_at").defaultNow()
 });
 
 export const insertImageSchema = createInsertSchema(images).omit({
@@ -37,13 +39,12 @@ export const insertImageSchema = createInsertSchema(images).omit({
 export type InsertImage = z.infer<typeof insertImageSchema>;
 export type Image = typeof images.$inferSelect;
 
-// Search history schema
+// Search history to track user searches
 export const searchHistory = pgTable("search_history", {
   id: serial("id").primaryKey(),
-  queryImageId: integer("query_image_id"),
-  queryUrl: text("query_url"),
-  resultsCount: integer("results_count"),
-  searchedAt: timestamp("searched_at").defaultNow().notNull(),
+  sourceImageId: integer("source_image_id").notNull(),
+  resultCount: integer("result_count").notNull(),
+  searchedAt: timestamp("searched_at").defaultNow()
 });
 
 export const insertSearchHistorySchema = createInsertSchema(searchHistory).omit({
@@ -54,31 +55,34 @@ export const insertSearchHistorySchema = createInsertSchema(searchHistory).omit(
 export type InsertSearchHistory = z.infer<typeof insertSearchHistorySchema>;
 export type SearchHistory = typeof searchHistory.$inferSelect;
 
-// Image search result type (not stored in DB)
-export const imageSearchResultSchema = z.object({
-  image: z.object({
-    id: z.number(),
-    filename: z.string(),
-    originalUrl: z.string().optional(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-    filesize: z.number().optional(),
-    format: z.string().optional(),
-  }),
-  similarity: z.number(),
-});
-
-export type ImageSearchResult = z.infer<typeof imageSearchResultSchema>;
-
-// Image with base64 data for preview
-export const imageWithDataSchema = z.object({
-  id: z.number().optional(),
+// Similar image result object (not a table, just for API responses)
+export const similarImageSchema = z.object({
+  id: z.number(),
   filename: z.string(),
-  data: z.string(), // base64 encoded image data
-  width: z.number().optional(),
-  height: z.number().optional(),
-  filesize: z.number().optional(),
-  format: z.string().optional(),
+  mimeType: z.string(),
+  width: z.number(),
+  height: z.number(),
+  size: z.number(),
+  source: z.string(),
+  similarityScore: z.number(),
+  imageData: z.string()
 });
 
-export type ImageWithData = z.infer<typeof imageWithDataSchema>;
+export type SimilarImage = z.infer<typeof similarImageSchema>;
+
+// Search results response schema
+export const searchResultsSchema = z.object({
+  sourceImage: z.number(),
+  results: z.array(similarImageSchema)
+});
+
+export type SearchResults = z.infer<typeof searchResultsSchema>;
+
+// Upload response schema
+export const uploadResponseSchema = z.object({
+  success: z.boolean(),
+  imageId: z.number().optional(),
+  error: z.string().optional()
+});
+
+export type UploadResponse = z.infer<typeof uploadResponseSchema>;
