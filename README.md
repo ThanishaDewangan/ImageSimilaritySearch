@@ -30,42 +30,61 @@ Clone the repository:
 
 git clone https://github.com/yourusername/ImageSimilaritySearch.git
 cd image-similarity-search
+
 Install dependencies:
 
 npm install
+
 Configure the database:
 
 Create a PostgreSQL database
 Create a .env file in the project root with:
 DATABASE_URL=postgresql://username:password@localhost:5432/databasename
+
 Push the database schema:
 
 npm run db:push
+
 Running the Application
 Development Mode
 npm run dev
+
 For Windows Users
 npm run dev:windows
+
 Or create a dev:windows script in package.json:
+
 
 "scripts": {
   "dev:windows": "set NODE_ENV=development && tsx server/index.ts"
 }
+
 Production Build
+
 npm run build
+
 npm start
+
 How It Works
+
 Image Upload: Users upload images via the frontend interface.
+
 Feature Extraction: The backend processes the image through a pre-trained neural network (MobileNet) to extract a feature vector.
+
 Similarity Calculation: When searching for similar images, the system calculates the cosine similarity between the query image's feature vector and all other images in the database.
+
 Results Ranking: Images are ranked by similarity score and returned to the user.
+
 API Endpoints
+
 POST /api/images/upload - Upload a new image
 GET /api/images/:id - Get a specific image
 GET /api/images/:id/similar - Find similar images to a specific image
 GET /api/history - Get search history
 DELETE /api/history - Clear search history
+
 Project Structure
+
 ├── client/                # Frontend React application
 │   ├── src/
 │   │   ├── components/    # UI components
@@ -85,14 +104,20 @@ Project Structure
 ├── shared/                # Shared code between frontend and backend
 │   └── schema.ts          # Database schema and types
 └── various config files   # Configuration files
+
 Troubleshooting
+
 TensorFlow.js Installation Issues
+
 If you encounter TensorFlow.js installation problems on Windows:
 
 npm rebuild @tensorflow/tfjs-node --build-addon-from-source
+
 Database Connection
+
 If you experience database connection issues:
 
 Verify PostgreSQL is running
+
 Check your DATABASE_URL environment variable
 Ensure your database exists and is accessible
