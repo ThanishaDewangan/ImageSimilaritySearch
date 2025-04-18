@@ -1,7 +1,9 @@
 Image Similarity Search
+
 A powerful AI-based image search engine that uses deep learning to find visually similar images. The application extracts feature vectors from images using TensorFlow.js and calculates similarity using cosine similarity between these vectors.
 
-Features
+Features:
+
 Upload images via drag-and-drop or file selection
 Real-time similar image search using neural network features
 View search history with previous queries
@@ -9,16 +11,20 @@ Grid and list view options for search results
 Similarity score visualization for each match
 Responsive design for desktop and mobile devices
 Persistent storage using PostgreSQL database
-Tech Stack
+
+Tech Stack:
+
 Frontend: React, TypeScript, TanStack Query, ShadCN UI components
 Backend: Node.js, Express
 Database: PostgreSQL with Drizzle ORM
 AI Model: TensorFlow.js MobileNet for feature extraction
 Build Tools: Vite, ESBuild
+
 Installation
 Prerequisites
 Node.js (v18+)
 PostgreSQL database
+
 Setup
 Clone the repository:
 
