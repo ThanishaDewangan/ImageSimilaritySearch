@@ -1,6 +1,8 @@
-import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs';
 import sharp from 'sharp';
-
+import '@tensorflow/tfjs-backend-cpu';
+// Initialize the CPU backend
+tf.setBackend('cpu');
 // Initialize MobileNet model
 let model: tf.GraphModel | null = null;
 
